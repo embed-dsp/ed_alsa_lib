@@ -62,7 +62,7 @@ HOST = armv8l-linux-gnueabihf
 # ----------------------------------------
 # Installation destination.
 # ----------------------------------------
-DESTDIR = /opt/ed_pi_alsa
+DESTDIR = /opt/ed_alsa
 
 # ----------------------------------------
 # C / C++ Compiler
