@@ -42,22 +42,25 @@ SOC = bcm2837
 
 # Cross Compile: Raspberry Pi tool chain (Linux): GCC 4.8.3, Default: 32-bit ARMv6 Cortex-A, hard-float, little-endian
 #TOOL_CHAIN = /opt/raspberry/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin
-#TOOL_PREFIX = arm-linux-gnueabihf-
+#TOOL_TRIPLET = arm-linux-gnueabihf
+#TOOL_PREFIX = $(TOOL_TRIPLET)-
 
 # Cross Compile: Raspberry Pi tool chain (Linux): GCC 4.9.3, Default: 32-bit ARMv6 Cortex-A, hard-float, little-endian
 #TOOL_CHAIN = /opt/raspberry/tools/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin
-#TOOL_PREFIX = arm-linux-gnueabihf-
+#TOOL_TRIPLET = arm-linux-gnueabihf
+#TOOL_PREFIX = $(TOOL_TRIPLET)-
 
+# FIXME: Generates "Segmentation fault" for SOC = bcm2835
 # Cross Compile: Linaro tool chain (Linux): GCC 7.1.1, Default: 32-bit ARMv8 Cortex-A, hard-float, little-endian
 #TOOL_CHAIN = /opt/gcc-arm/gcc-linaro-7.1.1-2017.08-x86_64_armv8l-linux-gnueabihf/bin
-#TOOL_PREFIX = armv8l-linux-gnueabihf-
+#TOOL_TRIPLET = armv8l-linux-gnueabihf
+#TOOL_PREFIX = $(TOOL_TRIPLET)-
 
+# FIXME: Generates "Segmentation fault" for SOC = bcm2835
 # Cross Compile: Linaro tool chain (Linux): GCC 7.2.1, Default: 32-bit ARMv8 Cortex-A, hard-float, little-endian
 TOOL_CHAIN = /opt/gcc-arm/gcc-linaro-7.2.1-2017.11-x86_64_armv8l-linux-gnueabihf/bin
-TOOL_PREFIX = armv8l-linux-gnueabihf-
-
-# FIXME: HOST
-HOST = armv8l-linux-gnueabihf
+TOOL_TRIPLET = armv8l-linux-gnueabihf
+TOOL_PREFIX = $(TOOL_TRIPLET)-
 
 # ----------------------------------------
 # Installation destination.
@@ -78,71 +81,79 @@ CCFLAGS += -O2
 #CCFLAGS += -O3
 #CCFLAGS += -Ofast
 #CCFLAGS += -Os
+#CCFLAGS += -Og
 
 # ----------------------------------------
 
 include make/soc.mk
 
 
-PATH:=$(TOOL_CHAIN):$(PATH)
+PATH := $(TOOL_CHAIN):$(PATH)
 
 PREFIX = $(DESTDIR)
 EXEC_PREFIX = $(PREFIX)/$(SOC)
 
+ALSA_LIB = alsa-lib
+
 
 all:
 	@echo ""
-	@echo "make distclean"
-	@echo ""
-	@echo "make build"
-	@echo ""
-	@echo "make prepare"
+	@echo "## First time"
+	@echo "make clone	    # Get openocd source from git repo"
+	@echo "make prepare	    # Checkout specific version"
 	@echo "make configure"
 	@echo "make compile"
-	@echo ""
 	@echo "sudo make install"
-	
+	@echo ""
+	@echo "## Any other time"
+	@echo "make distclean	    # Clean all build products"
+	@echo "make configure"
+	@echo "make compile"
+	@echo "sudo make install"
+	@echo ""
 
-.PHONY: build
-build: prepare configure compile
-	
+
+.PHONY: clone
+clone:
+	git clone git://git.alsa-project.org/alsa-lib.git $(ALSA_LIB)
+
 	
 .PHONY: prepare
 prepare:
 	# Discard any local changes
-	cd alsa-lib && git checkout -- .
+	cd $(ALSA_LIB) && git checkout -- .
 	
 	# Checkout specific version
-	cd alsa-lib && git checkout v1.1.3
+	cd $(ALSA_LIB) && git checkout v1.1.3
 	
 	# Rebuild configure
-	cd alsa-lib && autoreconf -f -i
-	
-
-.PHONY: configure
-configure:
-	cd alsa-lib && ./configure CFLAGS="$(CCFLAGS)" --host=$(HOST) --prefix=$(PREFIX) --exec-prefix=$(EXEC_PREFIX) --enable-static --disable-shared --disable-python
-	
-
-.PHONY: compile
-compile:
-	cd alsa-lib && make -j4
-	cd alsa-lib && make check
-	
-
-.PHONY: install
-install:
-	cd alsa-lib && make install
-#	-mkdir -p $(EXEC_PREFIX)/test
-	# Only when compiling with shared libraries.
-#	-cp alsa-lib/test/.libs/* $(EXEC_PREFIX)/test
+	cd $(ALSA_LIB) && autoreconf -f -i
 
 
 .PHONY: distclean
 distclean:
-	cd alsa-lib && make distclean
-	
+	cd $(ALSA_LIB) && make distclean
+
 
 .PHONY: clean
 clean:
-	cd alsa-lib && make clean
+	cd $(ALSA_LIB) && make clean
+
+
+.PHONY: configure
+configure:
+	cd $(ALSA_LIB) && ./configure CFLAGS="$(CCFLAGS)" --host=$(TOOL_TRIPLET) --prefix=$(PREFIX) --exec-prefix=$(EXEC_PREFIX) --enable-static --disable-shared --disable-python
+
+
+.PHONY: compile
+compile:
+	cd $(ALSA_LIB) && make -j4
+#	cd $(ALSA_LIB) && make check
+
+
+.PHONY: install
+install:
+	cd $(ALSA_LIB) && make install
+#	-mkdir -p $(EXEC_PREFIX)/test
+	# Only when compiling with shared libraries.
+#	-cp alsa-lib/test/.libs/* $(EXEC_PREFIX)/test

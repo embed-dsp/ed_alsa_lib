@@ -29,16 +29,16 @@ CCFLAGS += -march=armv6zk -mtune=arm1176jzf-s
 ifeq ($(BARE_METAL), 0)
 CCFLAGS += -mfloat-abi=hard
 CCFLAGS += -mfpu=vfpv3
-CCFLAGS += -ftree-vectorize
-CCFLAGS += -ftree-vectorizer-verbose=9
-CCFLAGS += -funsafe-math-optimizations
+#CCFLAGS += -ftree-vectorize
+#CCFLAGS += -ftree-vectorizer-verbose=9
+#CCFLAGS += -funsafe-math-optimizations
 else
 CCFLAGS += -mfloat-abi=softfp
 #CCFLAGS += -mfloat-abi=hard
 CCFLAGS += -mfpu=vfpv3
-CCFLAGS += -ftree-vectorize
-CCFLAGS += -ftree-vectorizer-verbose=9
-CCFLAGS += -funsafe-math-optimizations
+#CCFLAGS += -ftree-vectorize
+#CCFLAGS += -ftree-vectorizer-verbose=9
+#CCFLAGS += -funsafe-math-optimizations
 endif # BARE_METAL
 endif # SOC
 
@@ -86,18 +86,18 @@ CCFLAGS += -march=armv8-a -mtune=cortex-a53
 # Floating point
 ifeq ($(BARE_METAL), 0)
 CCFLAGS += -mfloat-abi=hard
-#CCFLAGS += -mfpu=vfpv4
-#CCFLAGS += -mfpu=neon
-CCFLAGS += -mfpu=neon-vfpv4
+#CCFLAGS += -mfpu=fp-armv8
+CCFLAGS += -mfpu=neon-fp-armv8
+#CCFLAGS += -mfpu=crypto-neon-fp-armv8
 CCFLAGS += -ftree-vectorize
 CCFLAGS += -ftree-vectorizer-verbose=9
 CCFLAGS += -funsafe-math-optimizations
 else
 CCFLAGS += -mfloat-abi=softfp
 #CCFLAGS += -mfloat-abi=hard
-#CCFLAGS += -mfpu=vfpv4
-#CCFLAGS += -mfpu=neon
-CCFLAGS += -mfpu=neon-vfpv4
+#CCFLAGS += -mfpu=fp-armv8
+CCFLAGS += -mfpu=neon-fp-armv8
+#CCFLAGS += -mfpu=crypto-neon-fp-armv8
 CCFLAGS += -ftree-vectorize
 CCFLAGS += -ftree-vectorizer-verbose=9
 CCFLAGS += -funsafe-math-optimizations
