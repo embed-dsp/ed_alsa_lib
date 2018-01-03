@@ -1,5 +1,5 @@
 
-# Copyright (c) 2017 embed-dsp
+# Copyright (c) 2017-2018 embed-dsp
 # All Rights Reserved
 
 # $Author:   Gudmundur Bogason <gb@embed-dsp.com> $
