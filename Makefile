@@ -1,14 +1,10 @@
 
-# Copyright (c) 2017 embed-dsp
+# Copyright (c) 2017-2018 embed-dsp
 # All Rights Reserved
 
 # $Author:   Gudmundur Bogason <gb@embed-dsp.com> $
 # $Date:     $
 # $Revision: $
-
-
-# dnf install automake
-# dnf install libtool
 
 BARE_METAL = 0
 
@@ -63,11 +59,6 @@ TOOL_TRIPLET = armv8l-linux-gnueabihf
 TOOL_PREFIX = $(TOOL_TRIPLET)-
 
 # ----------------------------------------
-# Installation destination.
-# ----------------------------------------
-DESTDIR = /opt/ed_alsa
-
-# ----------------------------------------
 # C / C++ Compiler
 # ----------------------------------------
 CC = $(TOOL_CHAIN)/$(TOOL_PREFIX)gcc
@@ -87,73 +78,89 @@ CCFLAGS += -O2
 
 include make/soc.mk
 
-
 PATH := $(TOOL_CHAIN):$(PATH)
 
-PREFIX = $(DESTDIR)
-EXEC_PREFIX = $(PREFIX)/$(SOC)
+# Package version number (git TAG)
+PACKAGE_VERSION = v1.1.3
 
-ALSA_LIB = alsa-lib
+PACKAGE_NAME = alsa-lib
+PACKAGE = $(PACKAGE_NAME)-$(PACKAGE_VERSION)
+
+# Set number of simultaneous jobs (Default 4)
+ifeq ($(J),)
+	J = 4
+endif
+
+PREFIX = /opt/alsa/$(PACKAGE)
+EXEC_PREFIX = $(PREFIX)/$(SOC)
 
 
 all:
 	@echo ""
-	@echo "## First time"
-	@echo "make clone	    # Get openocd source from git repo"
-	@echo "make prepare	    # Checkout specific version"
+	@echo "## Get the source"
+	@echo "make clone      # Clone git repository"
+	@echo "make pull       # Pull latest updates from git repository"
+	@echo ""
+	@echo "## Build"
+	@echo "make prepare    # Checkout specific version and rebuild configure"
 	@echo "make configure"
 	@echo "make compile"
+	@echo ""
+	@echo "## Install"
 	@echo "sudo make install"
 	@echo ""
-	@echo "## Any other time"
-	@echo "make distclean	    # Clean all build products"
-	@echo "make configure"
-	@echo "make compile"
-	@echo "sudo make install"
+	@echo "## Cleanup"
+	@echo "make clean      # Clean all build products"
+	@echo "make distclean  # Clean all build products"
 	@echo ""
 
 
 .PHONY: clone
 clone:
-	git clone git://git.alsa-project.org/alsa-lib.git $(ALSA_LIB)
+	git clone git://git.alsa-project.org/alsa-lib.git
+
+
+.PHONY: pull
+pull:
+	# Discard any local changes
+	cd $(PACKAGE_NAME) && git checkout -- .
+	
+	# Checkout master branch
+	cd $(PACKAGE_NAME) && git checkout master
+	
+	# ...
+	cd $(PACKAGE_NAME) && git pull
 
 	
 .PHONY: prepare
 prepare:
-	# Discard any local changes
-	cd $(ALSA_LIB) && git checkout -- .
-	
 	# Checkout specific version
-	cd $(ALSA_LIB) && git checkout v1.1.3
+	cd $(PACKAGE_NAME) && git checkout $(PACKAGE_VERSION)
 	
 	# Rebuild configure
-	cd $(ALSA_LIB) && autoreconf -f -i
-
-
-.PHONY: distclean
-distclean:
-	cd $(ALSA_LIB) && make distclean
-
-
-.PHONY: clean
-clean:
-	cd $(ALSA_LIB) && make clean
+	cd $(PACKAGE_NAME) && autoreconf -f -i
 
 
 .PHONY: configure
 configure:
-	cd $(ALSA_LIB) && ./configure CFLAGS="$(CCFLAGS)" --host=$(TOOL_TRIPLET) --prefix=$(PREFIX) --exec-prefix=$(EXEC_PREFIX) --enable-static --disable-shared --disable-python
+	cd $(PACKAGE_NAME) && ./configure CFLAGS="$(CCFLAGS)" --host=$(TOOL_TRIPLET) --prefix=$(PREFIX) --exec-prefix=$(EXEC_PREFIX) --enable-static --disable-shared --disable-python
 
 
 .PHONY: compile
 compile:
-	cd $(ALSA_LIB) && make -j4
-#	cd $(ALSA_LIB) && make check
+	cd $(PACKAGE_NAME) && make -j$(J)
 
 
 .PHONY: install
 install:
-	cd $(ALSA_LIB) && make install
-#	-mkdir -p $(EXEC_PREFIX)/test
-	# Only when compiling with shared libraries.
-#	-cp alsa-lib/test/.libs/* $(EXEC_PREFIX)/test
+	cd $(PACKAGE_NAME) && make install
+
+
+.PHONY: clean
+clean:
+	cd $(PACKAGE_NAME) && make clean
+
+
+.PHONY: distclean
+distclean:
+	cd $(PACKAGE_NAME) && make distclean
