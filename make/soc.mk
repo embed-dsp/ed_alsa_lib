@@ -8,13 +8,6 @@
 
 
 # ----------------------------------------
-# ARCH: ?
-# CORE: ?
-ifeq ($(SOC), generic)
-endif
-
-
-# ----------------------------------------
 # ARCH: ARMv6Z (32-bit)
 # CORE: Single-core ARM1176JZF-S
 ifeq ($(SOC), bcm2835)

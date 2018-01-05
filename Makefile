@@ -6,14 +6,10 @@
 # $Date:     $
 # $Revision: $
 
-BARE_METAL = 0
 
 # ----------------------------------------
 # System-on-Chip (SoC)
 # ----------------------------------------
-# No specific SoC
-#SOC = generic
-
 # Raspberry Pi Zero
 # Raspberry Pi Zero Wireless
 #SOC = bcm2835
@@ -22,7 +18,7 @@ BARE_METAL = 0
 #SOC = bcm2836
 
 # Raspberry Pi 3 Model B
-SOC = bcm2837
+#SOC = bcm2837
 
 # BeagleBone Black
 # BeagleBone Black Wireless
@@ -32,9 +28,16 @@ SOC = bcm2837
 # ----------------------------------------
 # Tool Chain
 # ----------------------------------------
+ifeq ($(SOC),)
 # Native compile.
-#TOOL_CHAIN = /usr/bin
-#TOOL_PREFIX = 
+TOOL_CHAIN = /usr/bin
+TOOL_TRIPLET =
+TOOL_PREFIX =
+else
+# Native compile.
+# TOOL_CHAIN = /usr/bin
+# TOOL_TRIPLET =
+# TOOL_PREFIX =
 
 # Cross Compile: Raspberry Pi tool chain (Linux): GCC 4.8.3, Default: 32-bit ARMv6 Cortex-A, hard-float, little-endian
 #TOOL_CHAIN = /opt/raspberry/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin
@@ -57,10 +60,12 @@ SOC = bcm2837
 TOOL_CHAIN = /opt/gcc-arm/gcc-linaro-7.2.1-2017.11-x86_64_armv8l-linux-gnueabihf/bin
 TOOL_TRIPLET = armv8l-linux-gnueabihf
 TOOL_PREFIX = $(TOOL_TRIPLET)-
+endif
+
+PATH := $(TOOL_CHAIN):$(PATH)
 
 # ----------------------------------------
 # C / C++ Compiler
-# ----------------------------------------
 CC = $(TOOL_CHAIN)/$(TOOL_PREFIX)gcc
 
 CCFLAGS =
@@ -75,43 +80,51 @@ CCFLAGS += -O2
 #CCFLAGS += -Og
 
 # ----------------------------------------
-
+BARE_METAL = 0
 include make/soc.mk
 
-PATH := $(TOOL_CHAIN):$(PATH)
+# ----------------------------------------
+PACKAGE_NAME = alsa-lib
 
-# Package version number (git TAG)
+# Package version number (git master branch / git tag)
 PACKAGE_VERSION = v1.1.3
 
-PACKAGE_NAME = alsa-lib
 PACKAGE = $(PACKAGE_NAME)-$(PACKAGE_VERSION)
+
+# Architecture.
+ifeq ($(SOC),)
+	ARCH = $(shell ./bin/get_arch.sh)
+else
+	ARCH = $(SOC)
+endif
+
+# Installation.
+PREFIX = /opt/alsa/$(PACKAGE)
+EXEC_PREFIX = $(PREFIX)/$(ARCH)
 
 # Set number of simultaneous jobs (Default 4)
 ifeq ($(J),)
 	J = 4
 endif
 
-PREFIX = /opt/alsa/$(PACKAGE)
-EXEC_PREFIX = $(PREFIX)/$(SOC)
-
-
+# ----------------------------------------
 all:
 	@echo ""
-	@echo "## Get the source"
-	@echo "make clone      # Clone git repository"
-	@echo "make pull       # Pull latest updates from git repository"
+	@echo "## Get Source Code"
+	@echo "make clone"
+	@echo "make pull"
 	@echo ""
 	@echo "## Build"
-	@echo "make prepare    # Checkout specific version and rebuild configure"
+	@echo "make prepare"
 	@echo "make configure"
-	@echo "make compile"
+	@echo "make compile [J=...]"
 	@echo ""
 	@echo "## Install"
 	@echo "sudo make install"
 	@echo ""
 	@echo "## Cleanup"
-	@echo "make clean      # Clean all build products"
-	@echo "make distclean  # Clean all build products"
+	@echo "make distclean"
+	@echo "make clean"
 	@echo ""
 
 
