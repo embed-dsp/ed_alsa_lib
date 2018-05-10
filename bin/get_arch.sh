@@ -7,6 +7,22 @@
 # $Date:     $
 # $Revision: $
 
+# This shell script returns the architecture name, i.e. the combination of 
+# kernel name and machine name.
+# 
+# Examples:
+#   linux_armv6l         Linux, 32-bit ARMV6 Little-Endian (Raspberry Pi Zero W, ...)
+#   linux_armv7l         Linux, 32-bit ARMV7 Little-Endian (Raspberry Pi 3 B/B+, ...)
+#   linux_x86            Linux, 32-bit Intel compatible
+#   linux_x86_64         Linux, 64-bit Intel compatible
+#   cygwin_x86          Cygwin, 32-bit Intel compatible
+#   cygwin_86_64        Cygwin, 64-bit Intel compatible
+#
+# Usage:
+#   get_arch.sh         Return architecture name.
+#   get_arch.sh 32      Return architecture name, assuming a 32-bit machine.
+#   get_arch.sh 64      Return architecture name, assuming a 64-bit machine.
+
 kernel=$(uname -s)
 machine=$(uname -m)
 
@@ -24,14 +40,20 @@ machine=$(uname -m)
 
 # Unify Intel/AMD machine names.
 case $machine in
-    i386)
-        machine="x86"
+    i386 | i686)
+        if [ "$1" == "64" ]; then
+            echo "* ERROR *: 64-bit not supported: $machine"
+            exit 1
+        else
+            machine="x86"
+        fi
         ;;
-    i686)
-        machine="x86"
-        ;;
-    amd64)
-        machine="x86_64"
+    x86_64 | amd64)
+        if [ "$1" == "32" ]; then
+            machine="x86"
+        else
+            machine="x86_64"
+        fi
         ;;
 esac
 
