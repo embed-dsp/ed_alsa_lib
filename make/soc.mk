@@ -8,6 +8,11 @@
 
 
 # ----------------------------------------
+# Raspberry Pi Zero
+# Raspberry Pi Zero Wireless
+# Raspberry Pi 1 Model A+
+# Raspberry Pi 1 Model B+
+# ----------------------------------------
 # ARCH: ARMv6Z (32-bit)
 # CORE: Single-core ARM1176JZF-S
 ifeq ($(SOC), bcm2835)
@@ -19,22 +24,15 @@ CCFLAGS += -marm
 # Processor
 CCFLAGS += -march=armv6zk -mtune=arm1176jzf-s
 # Floating point
-ifeq ($(BARE_METAL), 0)
 CCFLAGS += -mfloat-abi=hard
-CCFLAGS += -mfpu=vfpv3
+CCFLAGS += -mfpu=vfpv2
 #CCFLAGS += -ftree-vectorize
 #CCFLAGS += -ftree-vectorizer-verbose=9
 #CCFLAGS += -funsafe-math-optimizations
-else
-CCFLAGS += -mfloat-abi=softfp
-#CCFLAGS += -mfloat-abi=hard
-CCFLAGS += -mfpu=vfpv3
-#CCFLAGS += -ftree-vectorize
-#CCFLAGS += -ftree-vectorizer-verbose=9
-#CCFLAGS += -funsafe-math-optimizations
-endif # BARE_METAL
 endif # SOC
 
+# ----------------------------------------
+# Raspberry Pi 2 Model B
 # ----------------------------------------
 # ARCH: ARMv7-A (32-bit)
 # CORE: Quad-core ARM Cortex-A7
@@ -47,24 +45,19 @@ CCFLAGS += -marm
 # Processor
 CCFLAGS += -march=armv7-a -mtune=cortex-a7
 # Floating point
-ifeq ($(BARE_METAL), 0)
 CCFLAGS += -mfloat-abi=hard
 #CCFLAGS += -mfpu=vfpv4
 CCFLAGS += -mfpu=neon-vfpv4
-CCFLAGS += -ftree-vectorize
-CCFLAGS += -ftree-vectorizer-verbose=9
-CCFLAGS += -funsafe-math-optimizations
-else
-CCFLAGS += -mfloat-abi=softfp
-#CCFLAGS += -mfpu=vfpv4
-CCFLAGS += -mfpu=neon-vfpv4
-CCFLAGS += -ftree-vectorize
-CCFLAGS += -ftree-vectorizer-verbose=9
-CCFLAGS += -funsafe-math-optimizations
-endif # BARE_METAL
+# CCFLAGS += -ftree-vectorize
+# CCFLAGS += -ftree-vectorizer-verbose=9
+# CCFLAGS += -funsafe-math-optimizations
 endif # SOC
 
 
+# ----------------------------------------
+# Raspberry Pi 3 Compute
+# Raspberry Pi 3 Model B
+# Raspberry Pi 3 Model B+
 # ----------------------------------------
 # ARCH: ARMv8-A (32/64-bit)
 # CORE: Quad-core ARM Cortex-A53
@@ -77,27 +70,21 @@ CCFLAGS += -marm
 # Processor
 CCFLAGS += -march=armv8-a -mtune=cortex-a53
 # Floating point
-ifeq ($(BARE_METAL), 0)
 CCFLAGS += -mfloat-abi=hard
 #CCFLAGS += -mfpu=fp-armv8
 CCFLAGS += -mfpu=neon-fp-armv8
 #CCFLAGS += -mfpu=crypto-neon-fp-armv8
-CCFLAGS += -ftree-vectorize
-CCFLAGS += -ftree-vectorizer-verbose=9
-CCFLAGS += -funsafe-math-optimizations
-else
-CCFLAGS += -mfloat-abi=softfp
-#CCFLAGS += -mfloat-abi=hard
-#CCFLAGS += -mfpu=fp-armv8
-CCFLAGS += -mfpu=neon-fp-armv8
-#CCFLAGS += -mfpu=crypto-neon-fp-armv8
-CCFLAGS += -ftree-vectorize
-CCFLAGS += -ftree-vectorizer-verbose=9
-CCFLAGS += -funsafe-math-optimizations
-endif # BARE_METAL
+# CCFLAGS += -ftree-vectorize
+# CCFLAGS += -ftree-vectorizer-verbose=9
+# CCFLAGS += -funsafe-math-optimizations
 endif # SOC
 
 
+# ----------------------------------------
+# BeagleBone Black
+# BeagleBone Black Wireless
+# BeagleBone Blue
+# PocketBeagle
 # ----------------------------------------
 # ARCH: ARMv7-A (32-bit)
 # CORE: Single-core ARM Cortex-A8
@@ -110,19 +97,10 @@ CCFLAGS += -marm
 # Processor
 CCFLAGS += -march=armv7-a -mtune=cortex-a8
 # Floating point
-ifeq ($(BARE_METAL), 0)
 CCFLAGS += -mfloat-abi=hard
-#CCFLAGS += -mfpu=vfpv4
-CCFLAGS += -mfpu=neon-vfpv4
-CCFLAGS += -ftree-vectorize
-CCFLAGS += -ftree-vectorizer-verbose=9
-CCFLAGS += -funsafe-math-optimizations
-else
-CCFLAGS += -mfloat-abi=softfp
-#CCFLAGS += -mfpu=vfpv4
-CCFLAGS += -mfpu=neon-vfpv4
-CCFLAGS += -ftree-vectorize
-CCFLAGS += -ftree-vectorizer-verbose=9
-CCFLAGS += -funsafe-math-optimizations
-endif # BARE_METAL
+#CCFLAGS += -mfpu=vfpv3
+CCFLAGS += -mfpu=neon-vfpv3
+# CCFLAGS += -ftree-vectorize
+# CCFLAGS += -ftree-vectorizer-verbose=9
+# CCFLAGS += -funsafe-math-optimizations
 endif # SOC

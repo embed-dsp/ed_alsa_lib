@@ -7,68 +7,54 @@
 # $Revision: $
 
 
-# ----------------------------------------
-# System-on-Chip (SoC)
-# ----------------------------------------
-# Raspberry Pi Zero
-# Raspberry Pi Zero Wireless
-#SOC = bcm2835
+# Package.
+PACKAGE_NAME = alsa-lib
 
-# Raspberry Pi 2 Model B
-#SOC = bcm2836
+PACKAGE_VERSION = 1.1.7
 
-# Raspberry Pi 3 Model B
-#SOC = bcm2837
+PACKAGE = $(PACKAGE_NAME)-$(PACKAGE_VERSION)
 
-# BeagleBone Black
-# BeagleBone Black Wireless
-# BeagleBone Blue
-#SOC = am3358
+# ==============================================================================
 
-# ----------------------------------------
-# Tool Chain
-# ----------------------------------------
-ifeq ($(SOC),)
-# Native compile.
-TOOL_CHAIN = /usr/bin
-TOOL_TRIPLET =
-TOOL_PREFIX =
-else
-# Native compile.
-# TOOL_CHAIN = /usr/bin
-# TOOL_TRIPLET =
-# TOOL_PREFIX =
-
-# Cross Compile: Raspberry Pi tool chain (Linux): GCC 4.8.3, Default: 32-bit ARMv6 Cortex-A, hard-float, little-endian
-#TOOL_CHAIN = /opt/raspberry/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin
-#TOOL_TRIPLET = arm-linux-gnueabihf
-#TOOL_PREFIX = $(TOOL_TRIPLET)-
-
-# Cross Compile: Raspberry Pi tool chain (Linux): GCC 4.9.3, Default: 32-bit ARMv6 Cortex-A, hard-float, little-endian
-#TOOL_CHAIN = /opt/raspberry/tools/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin
-#TOOL_TRIPLET = arm-linux-gnueabihf
-#TOOL_PREFIX = $(TOOL_TRIPLET)-
-
-# FIXME: Generates "Segmentation fault" for SOC = bcm2835
-# Cross Compile: Linaro tool chain (Linux): GCC 7.1.1, Default: 32-bit ARMv8 Cortex-A, hard-float, little-endian
-#TOOL_CHAIN = /opt/gcc-arm/gcc-linaro-7.1.1-2017.08-x86_64_armv8l-linux-gnueabihf/bin
-#TOOL_TRIPLET = armv8l-linux-gnueabihf
-#TOOL_PREFIX = $(TOOL_TRIPLET)-
-
-# FIXME: Generates "Segmentation fault" for SOC = bcm2835
-# Cross Compile: Linaro tool chain (Linux): GCC 7.2.1, Default: 32-bit ARMv8 Cortex-A, hard-float, little-endian
-TOOL_CHAIN = /opt/gcc-arm/gcc-linaro-7.2.1-2017.11-x86_64_armv8l-linux-gnueabihf/bin
-TOOL_TRIPLET = armv8l-linux-gnueabihf
-TOOL_PREFIX = $(TOOL_TRIPLET)-
+# Set number of simultaneous jobs (Default 4)
+ifeq ($(J),)
+	J = 4
 endif
 
-PATH := $(TOOL_CHAIN):$(PATH)
+# System and Machine.
+SYSTEM = $(shell ./bin/get_system.sh)
+MACHINE = $(shell ./bin/get_machine.sh)
 
-# ----------------------------------------
-# C / C++ Compiler
-CC = $(TOOL_CHAIN)/$(TOOL_PREFIX)gcc
+# System configuration.
+CONFIGURE_FLAGS =
 
-CCFLAGS =
+# Architecture.
+ifeq ($(SOC),)
+	ARCH = $(SYSTEM)_$(MACHINE)
+else
+	ARCH = $(SYSTEM)_$(SOC)
+endif
+
+# Tool chain.
+TOOL_CHAIN = /usr/bin
+TOOL_TRIPLET =
+
+ifeq ($(CROSS_COMPILE),1)
+# Linaro tool chain (Linux): GCC 7.3.1, Default: 32-bit ARMv7 Cortex-A, little-endian, hard-float, vfpv3-d16
+TOOL_CHAIN = /opt/linaro/gcc-linaro-7.3.1-2018.05-x86_64_arm-linux-gnueabihf/bin
+TOOL_TRIPLET = arm-linux-gnueabihf
+
+# Raspberry Pi tool chain (Linux): GCC 4.9.3, Default: 32-bit ARMv6 Cortex-A, little-endian, hard-float, vfp
+#TOOL_CHAIN = /opt/raspberry/tools/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin
+#TOOL_TRIPLET = arm-linux-gnueabihf
+
+ifeq ($(SOC),)
+$(error The SOC=... variable must be specified when cross compiling.)
+endif
+endif
+
+# Compiler flags.
+CCFLAGS = -Wall
 
 # Optimization
 #CCFLAGS += -O0
@@ -79,48 +65,32 @@ CCFLAGS += -O2
 #CCFLAGS += -Os
 #CCFLAGS += -Og
 
-# ----------------------------------------
-BARE_METAL = 0
 include make/soc.mk
 
-# ----------------------------------------
-PACKAGE_NAME = alsa-lib
-
-# Package version number (git master branch / git tag)
-PACKAGE_VERSION = v1.1.3
-
-PACKAGE = $(PACKAGE_NAME)-$(PACKAGE_VERSION)
-
-# Architecture.
-ifeq ($(SOC),)
-	ARCH = $(shell ./bin/get_arch.sh)
-else
-	ARCH = $(SOC)
-endif
-
-# Installation.
-PREFIX = /opt/alsa/$(PACKAGE)
+# Installation directory.
+INSTALL_DIR = /opt
+PREFIX = $(INSTALL_DIR)/alsa/$(PACKAGE)
 EXEC_PREFIX = $(PREFIX)/$(ARCH)
 
-# Set number of simultaneous jobs (Default 4)
-ifeq ($(J),)
-	J = 4
-endif
+PATH := $(TOOL_CHAIN):$(PATH)
 
-# ----------------------------------------
+
 all:
+	@echo "TOOL_CHAIN   = $(TOOL_CHAIN)"
+	@echo "TOOL_TRIPLET = $(TOOL_TRIPLET)"
+	@echo "ARCH   = $(ARCH)"
+	@echo "PREFIX = $(PREFIX)"
 	@echo ""
 	@echo "## Get Source Code"
-	@echo "make clone"
-	@echo "make pull"
+	@echo "make download"
 	@echo ""
 	@echo "## Build"
 	@echo "make prepare"
-	@echo "make configure"
-	@echo "make compile [J=...]"
+	@echo "make configure [CROSS_COMPILE=1] [SOC=bcm2835|bcm2836|bcm2837|am3358|...]"
+	@echo "make compile [CROSS_COMPILE=1] [J=...]"
 	@echo ""
 	@echo "## Install"
-	@echo "sudo make install"
+	@echo "sudo make install [CROSS_COMPILE=1]"
 	@echo ""
 	@echo "## Cleanup"
 	@echo "make distclean"
@@ -128,52 +98,38 @@ all:
 	@echo ""
 
 
-.PHONY: clone
-clone:
-	git clone git://git.alsa-project.org/alsa-lib.git
-
-
-.PHONY: pull
-pull:
-	# Discard any local changes
-	cd $(PACKAGE_NAME) && git checkout -- .
-	
-	# Checkout master branch
-	cd $(PACKAGE_NAME) && git checkout master
-	
-	# ...
-	cd $(PACKAGE_NAME) && git pull
+.PHONY: download
+download:
+	-mkdir src
+	cd src && wget -nc ftp://ftp.alsa-project.org/pub/lib/$(PACKAGE).tar.bz2
 
 	
 .PHONY: prepare
 prepare:
-	# Checkout specific version
-	cd $(PACKAGE_NAME) && git checkout $(PACKAGE_VERSION)
-	
-	# Rebuild configure
-	cd $(PACKAGE_NAME) && autoreconf -f -i
+	-mkdir build
+	cd build && tar jxf ../src/$(PACKAGE).tar.bz2
 
 
 .PHONY: configure
 configure:
-	cd $(PACKAGE_NAME) && ./configure CFLAGS="$(CCFLAGS)" --host=$(TOOL_TRIPLET) --prefix=$(PREFIX) --exec-prefix=$(EXEC_PREFIX) --enable-static --disable-shared --disable-python
+	cd build/$(PACKAGE) && ./configure CFLAGS="$(CCFLAGS)" --host=$(TOOL_TRIPLET) --prefix=$(PREFIX) --exec-prefix=$(EXEC_PREFIX) --enable-static --disable-shared --disable-python --disable-silent-rules $(CONFIGURE_FLAGS)
 
 
 .PHONY: compile
 compile:
-	cd $(PACKAGE_NAME) && make -j$(J)
+	cd build/$(PACKAGE) && make -j$(J)
 
 
 .PHONY: install
 install:
-	cd $(PACKAGE_NAME) && make install
+	cd build/$(PACKAGE) && make install
 
 
 .PHONY: clean
 clean:
-	cd $(PACKAGE_NAME) && make clean
+	cd build/$(PACKAGE) && make clean
 
 
 .PHONY: distclean
 distclean:
-	cd $(PACKAGE_NAME) && make distclean
+	cd build/$(PACKAGE) && make distclean
