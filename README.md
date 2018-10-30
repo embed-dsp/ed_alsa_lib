@@ -7,7 +7,7 @@ This repository contains make files for easy cross compile of the ALSA Library f
 Prerequisites
 =============
 
-## Fedora-27
+## Fedora-28
 ```bash
 dnf install automake
 dnf install libtool
@@ -34,7 +34,7 @@ make pull
 
 # Edit the Makefile for selecting the ALSA Library source version (git master branch / git tag).
 vim Makefile
-PACKAGE_VERSION = v1.1.3
+PACKAGE_VERSION = 1.1.7
 ```
 
 Select SoC
@@ -120,51 +120,51 @@ sudo make install
 
 The build products are installed in the following locations:
 ```bash
-opt
-└── alsa
-    └── alsa-lib-v1.1.3
-        ├── include         # Include directory.
-        │   ├── alsa
+/opt/
+└── alsa/
+    └── alsa-lib-1.1.7/
+        ├── include/        # Include directory.
+        │   ├── alsa/
         │   │   ├── asoundlib.h
         │   │       ...
-        │   └── sys
+        │   └── sys/
         │       └── asoundlib.h
-        ├── share           # Architecture independent data files.
+        ├── share/          # Architecture independent data files.
         │   ...
-        ├── bcm2835         # SOC=bcm2835: Raspberry Pi Zero, Raspberry Pi Zero Wireless
-        │   ├── bin
+        ├── bcm2835/        # SOC=bcm2835: Raspberry Pi Zero, Raspberry Pi Zero Wireless
+        │   ├── bin/
         │   │   └── aserver
-        │   └── lib
+        │   └── lib/
         │       ├── libasound.a
         │           ...
-        ├── bcm2836         # SOC=bcm2836: Raspberry Pi 2 Model B
-        │   ├── bin
+        ├── bcm2836/        # SOC=bcm2836: Raspberry Pi 2 Model B
+        │   ├── bin/
         │   │   └── aserver
-        │   └── lib
+        │   └── lib/
         │       ├── libasound.a
         │           ...
-        ├── bcm2837         # SOC=bcm2837: Raspberry Pi 3 Model B
-        │   ├── bin
+        ├── bcm2837/        # SOC=bcm2837: Raspberry Pi 3 Model B
+        │   ├── bin/
         │   │   └── aserver
-        │   └── lib
+        │   └── lib/
         │       ├── libasound.a
         │           ...
-        ├── linux_armv6l    # Local build on: Raspberry Pi Zero, Raspberry Pi Zero Wireless
-        │   ├── bin
+        ├── linux_armv6l/   # Local build on: Raspberry Pi Zero/Zero Wireless
+        │   ├── bin/
         │   │   └── aserver
-        │   └── lib
+        │   └── lib/
         │       ├── libasound.a
         │           ...
-        ├── linux_armv7l    # Local build on: Raspberry Pi 3 Model B
-        │   ├── bin
+        ├── linux_armv7l/   # Local build on: Raspberry Pi 3 Model B/B+
+        │   ├── bin/
         │   │   └── aserver
-        │   └── lib
+        │   └── lib/
         │       ├── libasound.a
         │           ...
-        └── linux_x86_64    # Local build on: Fedora-27 (64-bit) Linux
-            ├── bin
+        └── linux_x86_64/   # Local build on: Fedora-28 (64-bit) Linux
+            ├── bin/
             │   └── aserver
-            └── lib
+            └── lib/
                 ├── libasound.a
                     ...
 ```
